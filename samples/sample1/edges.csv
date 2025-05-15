@@ -1,0 +1,14 @@
+0;3;Control;next
+1;4;Association;start
+4;16;Control;next
+7;6;Data;operand
+8;7;Data;left
+8;5;Data;right
+10;9;Data;operand
+13;12;Data;left
+13;11;Data;right
+14;13;Data;left
+14;10;Data;right
+15;14;Data;left
+15;8;Data;right
+16;15;Data;value

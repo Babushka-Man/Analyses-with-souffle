@@ -1,0 +1,17 @@
+0;Start;Control;Start
+1;Symbol;Data;foo
+2;Symbol;Data;_globals
+3;Return;Control;Return
+4;Start;Control;Start
+5;Literal;Data;1
+6;Literal;Data;2
+7;UnaryOperation;Data;-
+8;BinaryOperation;Data;-
+9;Literal;Data;3
+10;UnaryOperation;Data;-
+11;Literal;Data;4
+12;Literal;Data;5
+13;BinaryOperation;Data;+
+14;BinaryOperation;Data;*
+15;BinaryOperation;Data;-
+16;Return;Control;Return

@@ -1,0 +1,106 @@
+digraph {
+  subgraph "cluster_0" {
+    style = "dotted";
+    "0" [
+      label = "0 | Start";
+      shape = "diamond";
+    ];
+    "1" [
+      label = "1 | #baz";
+      shape = "rectangle";
+    ];
+    "2" [
+      label = "2 | #_globals";
+      shape = "rectangle";
+    ];
+    "3" [
+      label = "3 | Return";
+      shape = "diamond";
+    ];
+    subgraph "cluster_1" {
+      style = "dotted";
+      "4" [
+        label = "4 | Start";
+        shape = "diamond";
+      ];
+      "5" [
+        label = "5 | Parameter #0";
+        shape = "rectangle";
+      ];
+      "6" [
+        label = "6 | 1";
+        shape = "rectangle";
+      ];
+      "7" [
+        label = "7 | 2";
+        shape = "rectangle";
+      ];
+      "8" [
+        label = "8 | -";
+        shape = "rectangle";
+      ];
+      "9" [
+        label = "9 | 4";
+        shape = "rectangle";
+      ];
+      "10" [
+        label = "10 | *";
+        shape = "rectangle";
+      ];
+      "11" [
+        label = "11 | ^";
+        shape = "rectangle";
+      ];
+      "12" [
+        label = "12 | Return";
+        shape = "diamond";
+      ];
+      "4" -> "12" [
+        label = "next";
+        arrowhead = "normal";
+      ];
+      "8" -> "7" [
+        label = "left";
+        arrowhead = "onormal";
+      ];
+      "8" -> "6" [
+        label = "right";
+        arrowhead = "onormal";
+      ];
+      "10" -> "5" [
+        label = "left";
+        arrowhead = "onormal";
+      ];
+      "10" -> "9" [
+        label = "right";
+        arrowhead = "onormal";
+      ];
+      "11" -> "10" [
+        label = "left";
+        arrowhead = "onormal";
+      ];
+      "11" -> "8" [
+        label = "right";
+        arrowhead = "onormal";
+      ];
+      "12" -> "11" [
+        label = "value";
+        arrowhead = "onormal";
+      ];
+    }
+    "0" -> "3" [
+      label = "next";
+      arrowhead = "normal";
+    ];
+    "1" -> "4" [
+      label = "start";
+      arrowhead = "vee";
+      style = "dashed";
+    ];
+    "1" -> "5" [
+      label = "0";
+      arrowhead = "vee";
+      style = "dashed";
+    ];
+  }
+}

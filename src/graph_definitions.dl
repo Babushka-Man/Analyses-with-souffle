@@ -1,0 +1,22 @@
+
+#pragma once
+
+#include "ir_type.dl"
+
+.decl edge(src: number, dst: number, category: symbol, label: symbol)
+.input edge(filename="edges.csv", delimiter=";")
+
+.decl vertex(id: number, kind: symbol, category: symbol, label: symbol)
+.input vertex(filename="vertices.csv", delimiter=";")
+
+.decl data_vertex(v: number)
+data_vertex(v) :- vertex(v, _, "Data", _).
+data_vertex(v) :- vertex(v, _, "Compound", _).
+
+.decl control_vertex(v: number)
+control_vertex(v) :- vertex(v, _, "Control", _).
+control_vertex(v) :- vertex(v, _, "Compound", _).
+
+.decl reaching(src: number, dest: number)
+reaching(a, a) :- control_vertex(a).
+reaching(a, b) :- reaching(a, mid), edge(mid, b, "Control", _).

@@ -1,0 +1,26 @@
+
+
+
+.decl Number(num: number)
+.decl Add(left: number, right: number)
+.decl Sub(left: number, right: number)
+.decl Div(left: number, right: number)
+.decl Mul(left: number, right: number)
+
+.decl Positive(num: number)
+
+Positive(num):- Number(num), num >= 0.
+Positive(num):- Add(num1, num2), num = num1 + num2, num >= 0.
+Positive(num):- Sub(num1, num2), num = num1 - num2, num >= 0.
+Positive(num):- Div(num1, num2), num = num1 / num2, num >= 0.
+Positive(num):- Mul(num1, num2), num = num1 * num2, num >= 0.
+
+
+Number(1).
+Number(-2).
+Add(2, 4).
+Sub(2, 4).
+Div(4, 2).
+Mul(2, 4).
+
+.output Positive

@@ -1,0 +1,25 @@
+
+#include "graph_definitions.dl"
+#include "positiveness_ir_type.dl"
+
+
+
+.decl Number(num: number, type: irType<>)
+.decl Add(left: number, left_type: irType<>, right: number, right_type: irType<>)
+// .decl Sub(left: number, right: number)
+// .decl Div(left: number, right: number)
+// .decl Mul(left: number, right: number)
+
+Number(1, $Positive())
+Number(-2, $Negative())
+
+Add(1, $Positive(), 2, $Positive())
+Add(-1, $Negative(), -2, $Negative())
+Add(3, $Positive(), -2, $Negative())
+Add(-13, $Positive(), 12, $Negative())
+
+
+Number(num, @irTypeGlb(type1, type2)) :- Add(num1, type1, num2, type2).
+
+
+.output Number

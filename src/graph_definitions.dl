@@ -1,7 +1,8 @@
 
 #pragma once
 
-#include "ir_type.dl"
+// #include "ir_type.dl"
+
 
 .decl edge(src: number, dst: number, category: symbol, label: symbol)
 .input edge(filename="edges.csv", delimiter=";")

@@ -1,25 +1,42 @@
 
-#include "graph_definitions.dl"
-#include "positiveness_ir_type.dl"
+// #include "graph_definitions.dl"
+// #include "positiveness_ir_type.dl"
 
+#pragma once
 
+.type irType =
+      Any {}
+    | Positive {}
+    | Negative {}
+    | Bottom {}
 
-.decl Number(num: number, type: irType<>)
+//.functor irTypeLub(t1: irType, t2: irType): irType stateful
+//.functor irTypeGlb(t1: irType, t2: irType): irType stateful
+
+//.lattice irType<> {
+//    Bottom -> $Bottom(),
+//    Lub -> @irTypeLub(_,_),
+//    Glb -> @irTypeGlb(_,_),
+//    Top -> $Any()
+//}
+
+.decl Number(num: number)
 .decl Add(left: number, left_type: irType<>, right: number, right_type: irType<>)
 // .decl Sub(left: number, right: number)
 // .decl Div(left: number, right: number)
 // .decl Mul(left: number, right: number)
 
-Number(1, $Positive())
-Number(-2, $Negative())
 
-Add(1, $Positive(), 2, $Positive())
-Add(-1, $Negative(), -2, $Negative())
-Add(3, $Positive(), -2, $Negative())
-Add(-13, $Positive(), 12, $Negative())
+.decl Positiveness(num: number, type: irType<>)
+
+Positiveness(num, $Positive()) : Number(num), num >= 0. 
+Positiveness(num, $Negative()) : Number(num), num < 0. 
 
 
-Number(num, @irTypeGlb(type1, type2)) :- Add(num1, type1, num2, type2).
+Number(1)
+Number(-2)
+
+
 
 
 .output Number

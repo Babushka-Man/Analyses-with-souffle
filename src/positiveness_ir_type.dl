@@ -3,7 +3,10 @@
 .type irType =
       Any {}
     | Positive {}
+    | NonPositive {}
     | Negative {}
+    | NonNegative {}
+    | Zero {}
     | Bottom {}
 
 .functor irTypeLub(t1: irType, t2: irType): irType stateful

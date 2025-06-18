@@ -3,22 +3,16 @@
 #include "positiveness_ir_type.dl"
 
 .decl Number(num: number)
-// .decl Add(left: number, left_type: irType<>, right: number, right_type: irType<>)
-// .decl Sub(left: number, right: number)
-// .decl Div(left: number, right: number)
-// .decl Mul(left: number, right: number)
 
 
 .decl Positiveness(num: number, type: irType<>)
 
 Positiveness(num, $Positive()) :- Number(num), num > 0. 
-Positiveness(num, $NonPositive()) :- Number(num), num <= 0. 
 Positiveness(num, $Negative()) :- Number(num), num < 0. 
-Positiveness(num, $NonNegative()) :- Number(num), num >= 0. 
 Positiveness(num, $Zero()) :- Number(num), num = 0. 
 
-
-Number(1).
 Number(-2).
+Number(21).
+Number(0).
 
 .output Positiveness

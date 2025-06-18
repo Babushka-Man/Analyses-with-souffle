@@ -9,6 +9,10 @@ export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}`pwd`
 
 #include <exception>
 #include <cassert>
+#include <string>
+#include <memory>
+#include <stdexcept>
+#include <iostream>
 
 #include <souffle/SouffleInterface.h>
 
@@ -24,18 +28,22 @@ extern "C" {
     RamDomain irTypeGlb(SymbolTable* symbolTable, RecordTable* recordTable, RamDomain type1, RamDomain type2);
 }
 
+// Should be sorted alphabetically!!!
 enum irType {
     Any = 0,
-    Positive, // non-negative 
-    Negative,
     Bottom,
+    Negative,
+    NonNegative,
+    NonPositive, 
+    Positive,  
+    Zero,
 };
 
-Class Validator {
+class Validator {
 private:
     RamDomain _type1;
     RamDomain _type2;
-    bool _isValid = true;
+    bool _isValid = false;
     shared_ptr<Validator> _v = nullptr;
 
 protected:
@@ -56,11 +64,11 @@ public:
 
     shared_ptr<Validator> symRelHolds(RamDomain goalType1, RamDomain goalType2) {
         if(_v == nullptr) {
-            _v = std::make_shred<Validator>(_type1, _type2);
+            _v = std::make_shared<Validator>(_type1, _type2);
             _v->setValidator(_v);
         }
     
-        _v->setIsValid(_v->getIsValid() && 
+        _v->setIsValid(_v->getIsValid() || 
                        ((_type1 == goalType1 && _type2 == goalType2) ||
                         (_type1 == goalType2 && _type2 == goalType1)));
 
@@ -71,7 +79,7 @@ public:
         return _v->getIsValid();
     }
 
-}
+};
 
 RamDomain irTypeLub(SymbolTable* symbolTable, RecordTable* recordTable, RamDomain type1, RamDomain type2)
 {
@@ -89,29 +97,32 @@ RamDomain irTypeLub(SymbolTable* symbolTable, RecordTable* recordTable, RamDomai
     }
 
     Validator validator(type1, type2);
-
+    
     if(validator.symRelHolds(Zero, Negative)
-                .symRelHolds(Zero, Positive)
-                .symRelHolds(Positive, Negative)
-                .symRelHolds(Positive, NonPositive)
-                .symRelHolds(Negative, NonNegative).evaluate()) {
+                ->symRelHolds(Zero, Positive)
+                ->symRelHolds(Positive, Negative)
+                ->symRelHolds(Positive, NonPositive)
+                ->symRelHolds(Negative, NonNegative)->evaluate()) {
         return Any;
     }
-    if(validator.symRelHolds(Positive, NonNegative).evaluate()) {
+    if(validator.symRelHolds(Positive, NonNegative)->evaluate()) {
         return NonNegative;
     }
-    if(validator.symRelHolds(Negative, NonPositive).evaluate()) {
+    if(validator.symRelHolds(Negative, NonPositive)->evaluate()) {
         return NonPositive;
     }
-    if(validator.symRelHolds(NonNegative, NonPositive).evaluate()) {
-        return Zero;
+    if(validator.symRelHolds(NonNegative, NonPositive)->evaluate()) {
+        return Any;
     }
-    if(validator.symRelHolds(Zero, NonNegative)
-                .symRelHolds(Zero, NonPositive).evaluate()) {
-        return Zero;
+    if(validator.symRelHolds(Zero, NonNegative)->evaluate()) {
+        return NonNegative;
+    }
+    if(validator.symRelHolds(Zero, NonPositive)->evaluate()) {
+        return NonPositive;
     }
     
-    throw std::runtime_error("Error: Unexpected type combination in irTypeLub");
+    throw std::runtime_error("Error: Unexpected type combination in irTypeLub: " + 
+                             std::to_string(type1) + ", " + std::to_string(type2));
 }
 
 RamDomain irTypeGlb(SymbolTable* symbolTable, RecordTable* recordTable, RamDomain type1, RamDomain type2)
@@ -130,14 +141,30 @@ RamDomain irTypeGlb(SymbolTable* symbolTable, RecordTable* recordTable, RamDomai
     if(type1 == Bottom || type2 == Bottom) {
         return Bottom;
     }
-    if((type1 == Positive && type2 == Negative) || (type1 == Negative && type2 == Positive)) {
+
+    Validator validator(type1, type2);
+
+    if(validator.symRelHolds(Zero, Negative)
+                ->symRelHolds(Zero, Positive)
+                ->symRelHolds(Positive, Negative)
+                ->symRelHolds(Positive, NonPositive)
+                ->symRelHolds(Negative, NonNegative)->evaluate()) {
         return Bottom;
     }
-    if(type1 == Positive && type2 == Positive) {
+    if(validator.symRelHolds(Positive, NonNegative)->evaluate()) {
         return Positive;
     }
-    if(type1 == Negative && type2 == Negative) {
+    if(validator.symRelHolds(Negative, NonPositive)->evaluate()) {
         return Negative;
     }
-    throw std::runtime_error("Error: Unexpected type combination in irTypeGlb");
+    if(validator.symRelHolds(NonNegative, NonPositive)->evaluate()) {
+        return Zero;
+    }
+    if(validator.symRelHolds(Zero, NonNegative)
+                ->symRelHolds(Zero, NonPositive)->evaluate()) {
+        return Zero;
+    }
+    
+    throw std::runtime_error("Error: Unexpected type combination in irTypeGlb: " + 
+                             std::to_string(type1) + ", " + std::to_string(type2));
 }

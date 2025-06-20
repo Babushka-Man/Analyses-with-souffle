@@ -1,0 +1,6 @@
+#!/bin/bash
+
+g++ functors.cpp -c -fPIC -o functors.o 
+g++ -shared -o libfunctors.so functors.o 
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}`pwd`
+souffle -D- positiveness.dl

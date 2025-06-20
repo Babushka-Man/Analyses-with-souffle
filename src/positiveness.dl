@@ -1,18 +1,36 @@
 
-// #include "graph_definitions.dl"
+#include "graph_definitions.dl"
 #include "positiveness_ir_type.dl"
 
-.decl Number(num: number)
+.functor stoi(str: symbol): number
+.functor stoiWithUniOp(num: number, op: symbol): number
+.functor stoiWithBinOp(num1: number, num2: number, op: symbol): number
+
+.decl Number(id: number, num: number)
+
+.decl Positiveness(id: number, num: number, type: irType<>)
+
+Positiveness(id, num, $Positive()) :- Number(id, num), num > 0. 
+Positiveness(id, num, $Negative()) :- Number(id, num), num < 0. 
+Positiveness(id, num, $Zero()) :- Number(id, num), num = 0. 
+
+Number(id, @stoi(numAsStr)) :- vertex(id, "Literal", _, numAsStr).
+
+Number(srcId, @stoiWithUniOp(num, op)) :- 
+    vertex(srcId, "UnaryOperation", _, op),
+    edge(srcId, dstId, "Data", "operand"),
+    vertex(dstId, _, "Data", _),
+    Number(dstId, num).
+
+Number(srcId, @stoiWithBinOp(num1, num2, op)) :- 
+    vertex(srcId, "BinaryOperation", _, op),
+    edge(srcId, dstId1, "Data", "left"),
+    vertex(dstId1, _, "Data", _),
+    Number(dstId1, num1),
+    edge(srcId, dstId2, "Data", "right"),
+    vertex(dstId2, _, "Data", _),
+    Number(dstId2, num2).
 
 
-.decl Positiveness(num: number, type: irType<>)
-
-Positiveness(num, $Positive()) :- Number(num), num > 0. 
-Positiveness(num, $Negative()) :- Number(num), num < 0. 
-Positiveness(num, $Zero()) :- Number(num), num = 0. 
-
-Number(-2).
-Number(21).
-Number(0).
 
 .output Positiveness

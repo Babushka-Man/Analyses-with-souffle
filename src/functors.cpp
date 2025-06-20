@@ -26,6 +26,55 @@ using namespace std;
 extern "C" {
     RamDomain irTypeLub(SymbolTable* symbolTable, RecordTable* recordTable, RamDomain type1, RamDomain type2);
     RamDomain irTypeGlb(SymbolTable* symbolTable, RecordTable* recordTable, RamDomain type1, RamDomain type2);
+    int stoi(const char * str);
+    int stoiWithOp(const char * str, const char * op);
+    int stoiWithUniOp(int num, const char * op);
+    int stoiWithBinOp(int num1, int num2, const char * op);
+}
+
+int stoiWithBinOp(int num1, int num2, const char * op)
+{
+    if(op[0] == '+')
+    {
+        return num1 + num2;
+    }
+    else if(op[0] == '-')
+    {
+        return num1 - num2;
+    }
+    else if(op[0] == '*')
+    {
+        return num1 * num2;
+    }
+    else if(op[0] == '/')
+    {
+        if(num2 == 0) {
+            throw std::runtime_error("Error: Division by zero in stoiWithBinOp");
+        }
+        return num1 / num2;
+    }
+    
+    throw std::runtime_error("Error: Unsupported operator in stoiWithBinOp: " + string(op));
+    
+}
+
+int stoi(const char * str)
+{
+    return std::stoi(str);
+}
+
+int stoiWithUniOp(int num, const char * op)
+{
+    if(op[0] == '-')
+    {
+        return -num;
+    }
+    else if(op[0] != '+')
+    {
+        throw std::runtime_error("Error: Unsupported operator in stoiWithUniOp: " + string(op));
+    }
+    
+    return num;
 }
 
 // Should be sorted alphabetically!!!

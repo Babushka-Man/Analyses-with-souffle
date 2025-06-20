@@ -1,6 +1,28 @@
 #!/bin/bash
 
+# Check if exactly one argument is given
+if [ "$#" -gt 1 ]; then
+    echo "Usage: $0 [1 | 0 | -1 | none]"
+    exit 1
+fi
+
+# Validate that the argument is an integer using a regex
+if [[ "$#" == 1 && ! "$1" =~ ^-?[0-9]+$ ]]; then
+    echo "Error: Argument must be an integer."
+    exit 1
+fi
+
 g++ functors.cpp -c -fPIC -o functors.o 
 g++ -shared -o libfunctors.so functors.o 
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}`pwd`
-souffle -D- positiveness.dl
+
+if [ "$#" == 0 ]; then
+    souffle -D- positiveness.dl
+    exit 0
+fi
+
+if [ "$1" == "0" ]; then
+    souffle -D- if_zero_positiveness.dl
+    exit 0
+fi
+

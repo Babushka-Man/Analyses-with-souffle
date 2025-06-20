@@ -5,10 +5,10 @@
 
 
 .decl edge(src: number, dst: number, category: symbol, label: symbol)
-.input edge(filename="../samples/sample1/edges.csv", delimiter=";")
+.input edge(filename="../samples/sample2/edges.csv", delimiter=";")
 
 .decl vertex(id: number, kind: symbol, category: symbol, label: symbol)
-.input vertex(filename="../samples/sample1/vertices.csv", delimiter=";")
+.input vertex(filename="../samples/sample2/vertices.csv", delimiter=";")
 
 .decl data_vertex(v: number)
 data_vertex(v) :- vertex(v, _, "Data", _).

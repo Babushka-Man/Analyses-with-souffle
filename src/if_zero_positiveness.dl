@@ -1,0 +1,47 @@
+
+#include "graph_definitions.dl"
+#include "positiveness_ir_type.dl"
+
+.functor stoi(str: symbol): number
+.functor stoiWithUniOp(num: number, op: symbol): number
+.functor stoiWithBinOp(num1: number, num2: number, op: symbol): number
+
+// -----------------------------------------------------------------------------------
+// in case we have one unknown variable - lets see what we'll get if it whould be zero
+// -----------------------------------------------------------------------------------
+
+.decl IfZeroNumber(id: number, num: number)
+
+.decl IfZeroPositiveness(id: number, num: number, type: irType<>)
+
+IfZeroPositiveness(id, num, $Positive()) :- IfZeroNumber(id, num), num > 0. 
+IfZeroPositiveness(id, num, $Negative()) :- IfZeroNumber(id, num), num < 0. 
+IfZeroPositiveness(id, num, $Zero()) :- IfZeroNumber(id, num), num = 0. 
+
+IfZeroNumber(id, @stoi(numAsStr)) :- vertex(id, "Literal", _, numAsStr).
+IfZeroNumber(id, 0) :- vertex(id, "Parameter", _, _).
+
+IfZeroNumber(srcId, @stoiWithUniOp(num, op)) :- 
+    vertex(srcId, "UnaryOperation", _, op),
+    edge(srcId, destId, "Data", "operand"),
+    vertex(destId, _, "Data", _),
+    IfZeroNumber(destId, num).
+
+IfZeroNumber(srcId, @stoiWithBinOp(num1, num2, op)) :- 
+    vertex(srcId, "BinaryOperation", _, op),
+    edge(srcId, dstId1, "Data", "left"),
+    vertex(dstId1, _, "Data", _),
+    IfZeroNumber(dstId1, num1),
+    edge(srcId, dstId2, "Data", "right"),
+    vertex(dstId2, _, "Data", _),
+    IfZeroNumber(dstId2, num2).
+
+.decl Values(id: number, valueOf: symbol, val: number)
+
+Values(srcId, name, num) :- 
+    edge(srcId, destId, _, "value"),
+    vertex(srcId, _, _, name),
+    IfZeroNumber(destId, num).
+
+.output IfZeroPositiveness
+.output Values

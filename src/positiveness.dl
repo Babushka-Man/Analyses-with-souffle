@@ -1,43 +1,93 @@
 
 #include "graph_definitions.dl"
 #include "positiveness_ir_type.dl"
+#include "evenness.dl"
 
 .functor stoi(str: symbol): number
 .functor stoiWithUniOp(num: number, op: symbol): number
 .functor stoiWithBinOp(num1: number, num2: number, op: symbol): number
+.functor unaryOpOnType(type: irType, op: symbol): irType stateful
+.functor binaryOpOnTypes(type1: irType, type2: irType, op: symbol): irType stateful
 
-.decl Number(id: number, num: number)
 
-.decl Positiveness(id: number, num: number, type: irType<>)
+.decl Positiveness(id: number, type: irType<>)
 
-Positiveness(id, num, $Positive()) :- Number(id, num), num > 0. 
-Positiveness(id, num, $Negative()) :- Number(id, num), num < 0. 
-Positiveness(id, num, $Zero()) :- Number(id, num), num = 0. 
+// ----- dealing with literals -----
+Positiveness(id, $Positive()) :- vertex(id, "Literal", _, numAsStr), @stoi(numAsStr) > 0. 
+Positiveness(id, $Negative()) :- vertex(id, "Literal", _, numAsStr), @stoi(numAsStr) < 0. 
+Positiveness(id, $Zero()) :- vertex(id, "Literal", _, numAsStr), @stoi(numAsStr) = 0. 
 
-Number(id, @stoi(numAsStr)) :- vertex(id, "Literal", _, numAsStr).
+// ----- dealing with parameters -----
+Positiveness(id, $Bottom()) :- vertex(id, "Parameter", _, _).
 
-Number(srcId, @stoiWithUniOp(num, op)) :- 
+// ----- dealing with operations -----
+Positiveness(srcId, @unaryOpOnType(type, op)) :- 
     vertex(srcId, "UnaryOperation", _, op),
     edge(srcId, dstId, "Data", "operand"),
     vertex(dstId, _, "Data", _),
-    Number(dstId, num).
+    Positiveness(dstId, type).
 
-Number(srcId, @stoiWithBinOp(num1, num2, op)) :- 
+Positiveness(srcId, @binaryOpOnTypes(type1, type2, op)) :- 
+    op != "^",
     vertex(srcId, "BinaryOperation", _, op),
     edge(srcId, dstId1, "Data", "left"),
     vertex(dstId1, _, "Data", _),
-    Number(dstId1, num1),
+    Positiveness(dstId1, type1),
     edge(srcId, dstId2, "Data", "right"),
     vertex(dstId2, _, "Data", _),
-    Number(dstId2, num2).
+    Positiveness(dstId2, type2).
 
-.decl Values(id: number, valueOf: symbol, val: number)
+Positiveness(srcId, $Positive()) :- 
+    op = "^",
+    Evenness(dstId2, $Even()),
+    vertex(srcId, "BinaryOperation", _, op),
+    edge(srcId, dstId1, "Data", "left"),
+    vertex(dstId1, _, "Data", _),
+    Positiveness(dstId1, type1),
+    type1 != $Zero(),
+    edge(srcId, dstId2, "Data", "right"),
+    vertex(dstId2, _, "Data", _),
+    Positiveness(dstId2, _).
 
-Values(srcId, name, num) :- 
-    edge(srcId, destId, _, "value"),
-    vertex(srcId, _, _, name),
-    Number(destId, num).
+Positiveness(srcId, type1) :- 
+    op = "^",
+    Evenness(dstId2, $UnEven()),
+    vertex(srcId, "BinaryOperation", _, op),
+    edge(srcId, dstId1, "Data", "left"),
+    vertex(dstId1, _, "Data", _),
+    Positiveness(dstId1, type1),
+    edge(srcId, dstId2, "Data", "right"),
+    vertex(dstId2, _, "Data", _),
+    Positiveness(dstId2, _).
+    
+Positiveness(srcId, $Positive()) :- 
+    op = "^",
+    vertex(srcId, "BinaryOperation", _, op),
+    edge(srcId, dstId1, "Data", "left"),
+    vertex(dstId1, _, "Data", _),
+    Positiveness(dstId1, $Zero()),
+    edge(srcId, dstId2, "Data", "right"),
+    vertex(dstId2, _, "Data", _),
+    Positiveness(dstId2, $Zero()).
+    
+Positiveness(srcId, $Zero()) :- 
+    op = "^",
+    vertex(srcId, "BinaryOperation", _, op),
+    edge(srcId, dstId1, "Data", "left"),
+    vertex(dstId1, _, "Data", _),
+    Positiveness(dstId1, $Zero()),
+    edge(srcId, dstId2, "Data", "right"),
+    vertex(dstId2, _, "Data", _),
+    Positiveness(dstId2, type2),
+    type2 != $Zero().
+
+// .decl Values(id: number, valueOf: symbol, val: number)
+// 
+// Values(srcId, name, num) :- 
+//     edge(srcId, destId, _, "value"),
+//     vertex(srcId, _, _, name),
+//     Number(destId, num).
 
 
 .output Positiveness
-.output Values
+// .output Values

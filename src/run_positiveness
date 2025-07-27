@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Check if exactly one argument is given
+# Check if zero or one argument is given
 if [ "$#" -gt 1 ]; then
     echo "Usage: $0 [1 | 0 | -1 | none]"
     exit 1
@@ -12,11 +12,12 @@ if [[ "$#" == 1 && ! "$1" =~ ^-?[0-9]+$ ]]; then
     exit 1
 fi
 
-g++ functors.cpp -c -fPIC -o functors.o 
+g++ functors.cpp -c -fPIC -g -o functors.o 
 g++ -shared -o libfunctors.so functors.o 
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}`pwd`
 
 if [ "$#" == 0 ]; then
+#    souffle -o a.out positiveness.dl
     souffle -D- positiveness.dl
     exit 0
 fi
